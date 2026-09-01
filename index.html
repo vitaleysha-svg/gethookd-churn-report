@@ -1,0 +1,1840 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GetHookd Churn by Plan - Audited</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0d1117;
+  --surface:#161b22;
+  --raised:#1c2128;
+  --border:#30363d;
+  --divider:#21262d;
+  --text:#e6edf3;
+  --text-2:#c9d1d9;
+  --muted:#8b949e;
+  --accent:#f0883e;
+  --success:#3fb950;
+  --warning:#d29922;
+  --critical:#f85149;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  max-width:1060px;
+  margin:0 auto;
+  padding:40px 24px 64px;
+}
+h1{font-size:26px;line-height:1.25;margin:0 0 4px}
+h2{font-size:18px;margin:36px 0 10px}
+h3{font-size:15px;margin:0}
+p{color:var(--text-2)}
+.sub{color:var(--muted)}
+.eyebrow{
+  display:inline-block;
+  margin-bottom:10px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#d299221f;
+  color:#e3b341;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.tabs{
+  display:flex;
+  gap:8px;
+  margin:20px 0 6px;
+  overflow-x:auto;
+  padding-bottom:2px;
+}
+.tab{
+  flex:0 0 auto;
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--muted);
+  border-radius:8px;
+  padding:9px 18px;
+  font-size:14.5px;
+  font-weight:600;
+  cursor:pointer;
+}
+.tab.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.tab:focus-visible,.info:focus-visible,.copy-btn:focus-visible,summary:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+.panel[hidden]{display:none}
+.datebar{
+  background:linear-gradient(90deg,var(--raised),var(--surface));
+  border:1px solid #f0883e55;
+  border-radius:10px;
+  padding:13px 20px;
+  margin:14px 0 6px;
+  font-size:15.5px;
+}
+.datebar b{color:var(--accent)}
+.cards{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:13px 17px;
+  flex:1 1 185px;
+  min-width:185px;
+}
+.card .n{
+  color:var(--accent);
+  font-size:25px;
+  font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.card .l{color:var(--muted);font-size:13px}
+.table-wrap{overflow-x:auto}
+table{
+  border-collapse:collapse;
+  width:100%;
+  margin:8px 0 4px;
+  font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+caption{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+th{
+  text-align:left;
+  color:var(--muted);
+  font-weight:600;
+  border-bottom:1px solid var(--border);
+  padding:8px 10px;
+  white-space:nowrap;
+}
+td{border-bottom:1px solid var(--divider);padding:9px 10px;white-space:nowrap}
+td:first-child,th:first-child{white-space:normal}
+td.hl,th.hl{color:var(--accent);font-weight:700}
+tr.tot td{border-top:2px solid var(--border);font-weight:700}
+.info{
+  display:inline-grid;
+  place-items:center;
+  position:relative;
+  cursor:help;
+  color:var(--muted);
+  background:transparent;
+  border:1.5px solid var(--muted);
+  border-radius:50%;
+  width:15px;
+  height:15px;
+  padding:0;
+  margin-left:6px;
+  vertical-align:2px;
+  font:700 10px/1 Georgia,serif;
+}
+.info .tip{
+  display:none;
+  position:absolute;
+  bottom:140%;
+  left:50%;
+  transform:translateX(-50%);
+  width:290px;
+  max-width:min(290px,calc(100vw - 32px));
+  background:var(--raised);
+  border:1px solid #f0883e88;
+  border-radius:8px;
+  padding:11px 13px;
+  color:var(--text);
+  font:400 12.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  z-index:20;
+  text-align:left;
+  white-space:normal;
+}
+.info:hover .tip,.info:focus .tip,.info.open .tip{display:block}
+.section-note{color:var(--muted);font-size:13px;margin:2px 0 12px}
+.definition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.definition{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 16px;
+}
+.definition p{font-size:13px;margin:6px 0 0;color:var(--muted)}
+.audit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:14px 0}
+.audit-mini{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:13px 15px;
+}
+.audit-mini .k{color:var(--muted);font-size:12px}
+.audit-mini .v{color:var(--text);font-size:17px;font-weight:700;margin-top:4px}
+.delta-up{color:var(--critical);font-weight:700}
+.delta-down{color:var(--success);font-weight:700}
+.adv{
+  background:var(--surface);
+  border:1px solid var(--warning);
+  border-radius:10px;
+  padding:14px 18px;
+  margin:16px 0;
+  color:var(--text-2);
+  font-size:14px;
+}
+.adv strong{color:#e3b341}
+.launch-evidence code,.provenance code{
+  color:var(--text-2);
+  font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+ul{color:var(--text-2);font-size:14px}
+.sql-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0;
+}
+details+details{border-top:1px solid var(--border)}
+summary{
+  cursor:pointer;
+  padding:14px 18px;
+  color:var(--text);
+  font-weight:700;
+}
+.sql-meta{padding:0 18px 12px;color:var(--muted);font-size:13px}
+.sql-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--raised);
+}
+.copy-btn{
+  background:var(--border);
+  border:1px solid #484f58;
+  color:var(--text);
+  border-radius:7px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.copy-status{color:var(--muted);font-size:12px;min-height:1.2em}
+pre{
+  margin:0;
+  padding:16px 18px;
+  max-height:680px;
+  overflow:auto;
+  background:#0b0f14;
+  color:var(--text-2);
+  font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  tab-size:2;
+}
+.provenance{
+  margin-top:28px;
+  padding-top:16px;
+  border-top:1px solid var(--divider);
+  color:var(--muted);
+  font-size:12px;
+}
+@media (max-width:760px){
+  body{padding:28px 18px 48px}
+  .audit-grid,.definition-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:520px){
+  .cards{display:grid;grid-template-columns:1fr}
+  .card{min-width:0}
+  .audit-grid,.definition-grid{grid-template-columns:1fr}
+  .tab{padding:8px 14px}
+}
+@media print{
+  :root{color-scheme:light}
+  body{background:#fff;color:#111;max-width:none;padding:20px}
+  .tabs,.copy-btn,.copy-status{display:none}
+  .panel[hidden]{display:block}
+  .panel{break-inside:avoid}
+  .panel::before{display:block;margin:18px 0 8px;font-size:18px;font-weight:700}
+  #w30::before{content:"30 days"}
+  #w120::before{content:"120 days"}
+  #launch::before{content:"Since launch"}
+  .card,.definition,.audit-mini,.adv,.sql-card{background:#fff;color:#111;break-inside:avoid}
+  .card .l,.sub,.section-note,.definition p,.sql-meta,.provenance{color:#555}
+  pre{max-height:none;background:#f6f8fa;color:#111;white-space:pre-wrap}
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="eyebrow">Revised after Stripe audit</span>
+    <h1>Churn Rate by Plan</h1>
+    <div class="sub">GetHookd · four canonical monthly tiers · frozen Aug 31, 2026 Stripe snapshot · toggle the window below</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Churn reporting window">
+    <button class="tab on" id="tab-w30" role="tab" aria-selected="true" aria-controls="w30" tabindex="0" data-panel="w30">30 days</button>
+    <button class="tab" id="tab-w120" role="tab" aria-selected="false" aria-controls="w120" tabindex="-1" data-panel="w120">120 days</button>
+    <button class="tab" id="tab-launch" role="tab" aria-selected="false" aria-controls="launch" tabindex="-1" data-panel="launch">Since launch</button>
+  </nav>
+
+  <div id="report-panels"></div>
+
+  <section aria-labelledby="definitions-title">
+    <h2 id="definitions-title">What each number means</h2>
+    <div class="definition-grid">
+      <article class="definition">
+        <h3>Gross subscription churn</h3>
+        <p>Paid subscriptions in the fixed start cohort whose <code>ended_at</code> falls inside the window, divided by paid subscriptions at the start.</p>
+      </article>
+      <article class="definition">
+        <h3>Event-based monthly-core logo loss</h3>
+        <p>Start customer IDs with a subscription end event and no paid service on any canonical monthly tier at the cutoff.</p>
+      </article>
+      <article class="definition">
+        <h3>Monthly-core service loss</h3>
+        <p>All start customer IDs without paid canonical monthly service at the cutoff, including migrations or unresolved billing lapse without an end event.</p>
+      </article>
+      <article class="definition">
+        <h3>Since-launch disposition</h3>
+        <p>Customers enter under their first successfully paid canonical tier after launch. It is a cumulative, varying-exposure cohort and is not a monthly churn rate.</p>
+      </article>
+    </div>
+    <p class="section-note">Monthly-core loss is not whole-business logo churn. A customer may still pay on an annual, legacy, or intentionally excluded alternate product.</p>
+  </section>
+
+  <section aria-labelledby="comparison-title">
+    <h2 id="comparison-title">Original report vs audited result</h2>
+    <p class="section-note">Yes, the audit compared Claude's HTML against a fresh read-only Stripe reconstruction, cell by cell, across Starter, Pro, Team, Agency, and the all-tier total.</p>
+    <div class="audit-grid">
+      <div class="audit-mini"><div class="k">Published event buckets</div><div class="v">Reproduced exactly</div></div>
+      <div class="audit-mini"><div class="k">Headline definition</div><div class="v">Not standard churn</div></div>
+      <div class="audit-mini"><div class="k">Status-base rows never paid</div><div class="v">177</div></div>
+      <div class="audit-mini"><div class="k">30d Agency latest-paid tier</div><div class="v">6, not 20</div></div>
+    </div>
+    <div class="table-wrap">
+      <table id="comparison-table">
+        <caption>Claude's published ended-share compared with audited fixed start-cohort churn</caption>
+        <thead>
+          <tr>
+            <th scope="col">Window</th>
+            <th scope="col">Plan</th>
+            <th scope="col">Claude ended-share</th>
+            <th scope="col">Audited gross churn</th>
+            <th scope="col">Difference</th>
+          </tr>
+        </thead>
+        <tbody id="comparison-body"></tbody>
+      </table>
+    </div>
+    <p class="section-note">* Claude's "lifetime" code starts at Unix epoch zero and uses an end-survivor denominator. The audited since-launch row starts from successfully paid current-tier evidence on Mar 25-26 and uses an exclusive entry cohort. The percentage delta is diagnostic; the definitions are not interchangeable.</p>
+    <details>
+      <summary>30-day cancellation tier attribution comparison</summary>
+      <p class="section-note">Claude used the final subscription item as the cancellation tier. The audit uses the latest successfully paid canonical tier no later than termination.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Published versus latest paid tier attribution for 30-day cancellation events</caption>
+          <thead><tr><th scope="col">Tier</th><th scope="col">Claude final-item count</th><th scope="col">Latest paid tier count</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Starter</th><td>720</td><td>721</td></tr>
+            <tr><th scope="row">Pro</th><td>225</td><td>232</td></tr>
+            <tr><th scope="row">Team</th><td>197</td><td>201</td></tr>
+            <tr><th scope="row">Agency</th><td>20</td><td class="hl">6</td></tr>
+            <tr><th scope="row">Unattributed before termination</th><td>0</td><td>2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section class="launch-evidence" aria-labelledby="launch-title">
+    <h2 id="launch-title">Tier launch baseline</h2>
+    <p class="section-note">Stripe price creation and first successful paid service are the launch evidence. Older subscription shells are not used as tier start dates because they were migrated onto prices that did not yet exist.</p>
+    <p class="section-note">Stripe shows a gradual ramp, not a discrete "at scale" switch. The report therefore uses cumulative paid entry from the exact tier launches instead of inventing an at-scale cutoff.</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Canonical tier launch evidence from Stripe</caption>
+        <thead><tr><th scope="col">Tier</th><th scope="col">Canonical price created UTC</th><th scope="col">First paid service UTC</th><th scope="col">Price ID</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Starter ($29/month)</th><td>Mar 25, 2026 14:39:41</td><td>Mar 25, 2026 16:19:56</td><td><code>price_1TEsavLnfBBzdwXDdu5OJYuB</code></td></tr>
+          <tr><th scope="row">Pro ($49/month)</th><td>Mar 25, 2026 14:43:52</td><td>Mar 26, 2026 10:59:03</td><td><code>price_1TEseyLnfBBzdwXDH1RcdZ4e</code></td></tr>
+          <tr><th scope="row">Team ($79/month)</th><td>Mar 25, 2026 14:46:45</td><td>Mar 26, 2026 15:51:41</td><td><code>price_1TEshlLnfBBzdwXDvx4og8u2</code></td></tr>
+          <tr><th scope="row">Agency ($129/month)</th><td>Mar 25, 2026 14:52:19</td><td>Mar 25, 2026 19:32:25</td><td><code>price_1TEsn9LnfBBzdwXDFSJEiV43</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="adv" role="note">
+    <strong>Audit verdict: REVISED.</strong>
+    Claude's cancellation-event buckets reproduce, but the denominator, current-paying interpretation, cancellation-tier assignment, lost-customer label, trial claims, and epoch-zero "lifetime" boundary do not support the published churn conclusions. The original HTML remains preserved; this is a separate corrected report.
+  </div>
+
+  <section aria-labelledby="method-title">
+    <h2 id="method-title">How the audited numbers were verified</h2>
+    <ul>
+      <li>29,134 subscriptions containing one of the four canonical prices were enumerated read-only.</li>
+      <li>128,439 paid invoices were scanned from Jan 1, 2024; 58,598 had positive payment.</li>
+      <li>A separate full-population boundary pass scanned 41,546 paid invoices in the required lookbacks and retrieved all 15 canonical-boundary candidates missing from the current-price union. Zero candidates were left unresolved.</li>
+      <li>The since-launch pass scanned 56,729 paid invoices and retrieved all 17 entrant subscription IDs absent from the current-price union. It excludes 34 subscriptions whose first positive payment arrived only after <code>ended_at</code>, so a post-cancellation collection cannot retroactively create a paid-before-loss entrant.</li>
+      <li>Plan-product lines were ranked from an explicit 33-product detection catalog before exact canonical monthly prices were assigned, preventing unrelated add-ons from winning plan attribution.</li>
+      <li>The original HTML SHA-256 is <code>21a882f836a6251f98897cffe5017a09884f6bd47ce5aca911757032ae6fd3c3</code>.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="sql-title">
+    <h2 id="sql-title">SQL for the metric panels and Claude comparison</h2>
+    <p class="section-note">These queries reproduce all three tier tables and the published-vs-audited rate comparison. Run in Stripe Sigma against a snapshot containing data through Aug 31, 2026 11:47:21 UTC. If this account exposes <code>invoice_line_items.price_id</code> rather than <code>plan_id</code>, make the alias replacement documented inside the query.</p>
+    <div class="sql-card">
+      <details open>
+        <summary>Audited 30-day, 120-day, and since-launch SQL</summary>
+        <div class="sql-meta">Fixed start-cohort metrics for 30/120 days, plus the exclusive first-paid-tier cumulative launch cohort.</div>
+        <div class="sql-toolbar"><span class="copy-status" id="copy-status-audited" aria-live="polite"></span><button class="copy-btn" type="button" data-copy="sql-audited" data-status="copy-status-audited">Copy SQL</button></div>
+        <pre><code id="sql-audited">-- GetHookd churn-by-plan audit queries
+-- Prepared 2026-08-31 from a read-only Stripe API reconstruction.
+--
+-- Stripe Sigma schema note:
+--   This file uses invoice_line_items.plan_id, the common Sigma name for the
+--   Stripe Price/legacy Plan identifier. If this account exposes price_id
+--   instead, replace every ili.plan_id reference in Queries A and C with
+--   ili.price_id.
+--
+-- All TIMESTAMP literals below are UTC. Windows are half-open [start, end).
+
+
+-- ============================================================================
+-- QUERY A: FIXED START-COHORT METRICS
+-- ============================================================================
+-- Produces, per starting tier and in a deduplicated all-tier total:
+--   1. gross subscription ends / paid subscriptions at start;
+--   2. tier exits / paid subscriptions at start;
+--   3. event-based canonical-monthly logo loss;
+--   4. point-in-time canonical-monthly paid-service loss.
+--
+-- Boundary membership requires a positive paid recurring invoice line whose
+-- service period covers that boundary. Recurring price lines belonging to the
+-- explicit plan-product scope are ranked before the four exact core prices are
+-- joined. This prevents both of these errors:
+--   * an unrelated recurring add-on outranking the tier;
+--   * an older canonical price hiding a newer non-core price on a tier product.
+
+WITH
+windows (
+  window_key,
+  window_days,
+  start_at,
+  end_at
+) AS (
+  VALUES
+    (
+      '30d',
+      30,
+      TIMESTAMP '2026-08-01 11:47:21',
+      TIMESTAMP '2026-08-31 11:47:21'
+    ),
+    (
+      '120d',
+      120,
+      TIMESTAMP '2026-05-03 11:47:21',
+      TIMESTAMP '2026-08-31 11:47:21'
+    )
+),
+
+price_map (
+  price_id,
+  tier_name,
+  tier_order
+) AS (
+  VALUES
+    ('price_1TEsavLnfBBzdwXDdu5OJYuB', 'Starter ($29/month)', 1),
+    ('price_1TEseyLnfBBzdwXDH1RcdZ4e', 'Pro ($49/month)',     2),
+    ('price_1TEshlLnfBBzdwXDvx4og8u2', 'Team ($79/month)',   3),
+    ('price_1TEsn9LnfBBzdwXDFSJEiV43', 'Agency ($129/month)', 4)
+),
+
+-- Detection/ranking scope: known canonical monthly, alternate, annual, and
+-- historical plan products. Only the four exact monthly prices are in
+-- price_map. Other plan products can win the temporal rank but resolve to NULL
+-- as a monthly-portfolio exit. Unrelated recurring add-ons remain out.
+tier_products (
+  product_id
+) AS (
+  VALUES
+    ('prod_UDJDtFxubsIPoy'),
+    ('prod_UDJHllai95Kctx'),
+    ('prod_UDJK8joVZdKA2v'),
+    ('prod_UDJPq8QO3CSEqw'),
+    ('prod_V1TMh6R6BurXyK'),
+    ('prod_V1TMwh6fY22bRz'),
+    ('prod_V18RAT8yxl306P'),
+    ('prod_UDJEb3IVCo8YwS'),
+    ('prod_UDJI7cHycrzzXv'),
+    ('prod_UDJOwzRHZDvbSj'),
+    ('prod_UDJR22dmPhY9xz'),
+    ('prod_Q7Joa1kkMcB1gk'),
+    ('prod_Q7JqaK1458BEIf'),
+    ('prod_SthqEojqp9ZxwW'),
+    ('prod_StiB20a4BX7lCn'),
+    ('prod_StiRvbIyc1ILw4'),
+    ('prod_TY1QdobsRqfrnY'),
+    ('prod_Tc6fMOFljdu4tu'),
+    ('prod_Tc6vzeJE3vmtLQ'),
+    ('prod_RQDh61VAmeLbS6'),
+    ('prod_RGVC1NUzm3BnPY'),
+    ('prod_RGVE3jAEvadqbw'),
+    ('prod_RGVI00SezdDn0z'),
+    ('prod_Qi1iL0E4TC4PFO'),
+    ('prod_RGVKY6YQxMcVro'),
+    ('prod_Qi1l4RkKllNNnS'),
+    ('prod_TRkdcRzTLMane8'),
+    ('prod_StiGimjMKy4dHh'),
+    ('prod_Sti47zaxNhfOC9'),
+    ('prod_TY1XCKtE7vhSsq'),
+    ('prod_Tc70WdTtS5LKRb'),
+    ('prod_StiVEPEDQ0Cijr'),
+    ('prod_SUU91xIS11CA5S')
+),
+
+paid_recurring_exposures AS (
+  SELECT
+    i.subscription_id,
+    s.customer_id,
+    ili.id AS invoice_line_id,
+    i.id AS invoice_id,
+    ili.plan_id AS price_id,
+    pr.product_id,
+    COALESCE(i.status_transitions_paid_at, i.date) AS paid_at,
+    ili.period_start,
+    ili.period_end,
+    s.created AS subscription_created,
+    s.ended_at
+  FROM invoices i
+  INNER JOIN invoice_line_items ili
+    ON ili.invoice_id = i.id
+  INNER JOIN prices pr
+    ON pr.id = ili.plan_id
+  INNER JOIN tier_products tp
+    ON tp.product_id = pr.product_id
+  INNER JOIN subscriptions s
+    ON s.id = i.subscription_id
+  WHERE i.subscription_id IS NOT NULL
+    AND i.status = 'paid'
+    AND COALESCE(i.amount_paid, 0) &gt; 0
+    AND ili.type = 'subscription'
+    AND COALESCE(ili.amount, 0) &gt; 0
+    AND ili.period_end &gt; ili.period_start
+),
+
+start_ranked AS (
+  SELECT
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at,
+    pe.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY
+        w.window_key,
+        pe.subscription_id
+      ORDER BY
+        pe.paid_at DESC,
+        pe.period_start DESC,
+        pe.period_end DESC,
+        pe.invoice_id DESC,
+        pe.invoice_line_id DESC
+    ) AS exposure_rank
+  FROM windows w
+  INNER JOIN paid_recurring_exposures pe
+    ON pe.paid_at &lt; w.start_at
+   AND pe.period_start &lt;= w.start_at
+   AND pe.period_end &gt; w.start_at
+  WHERE pe.subscription_created &lt; w.start_at
+    AND (
+      pe.ended_at IS NULL
+      OR pe.ended_at &gt; w.start_at
+    )
+),
+
+start_base AS (
+  SELECT
+    sr.window_key,
+    sr.window_days,
+    sr.start_at,
+    sr.end_at,
+    sr.subscription_id,
+    sr.customer_id,
+    sr.price_id,
+    sr.ended_at,
+    pm.tier_name,
+    pm.tier_order
+  FROM start_ranked sr
+  INNER JOIN price_map pm
+    ON pm.price_id = sr.price_id
+  WHERE sr.exposure_rank = 1
+),
+
+end_ranked AS (
+  SELECT
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at,
+    pe.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY
+        w.window_key,
+        pe.subscription_id
+      ORDER BY
+        pe.paid_at DESC,
+        pe.period_start DESC,
+        pe.period_end DESC,
+        pe.invoice_id DESC,
+        pe.invoice_line_id DESC
+    ) AS exposure_rank
+  FROM windows w
+  INNER JOIN paid_recurring_exposures pe
+    ON pe.paid_at &lt; w.end_at
+   AND pe.period_start &lt;= w.end_at
+   AND pe.period_end &gt; w.end_at
+  WHERE pe.subscription_created &lt; w.end_at
+    AND (
+      pe.ended_at IS NULL
+      OR pe.ended_at &gt; w.end_at
+    )
+),
+
+-- LEFT JOIN is intentional. A current non-core recurring price remains an end
+-- exposure with tier_name NULL and is treated as an exit from the core tier.
+end_plan AS (
+  SELECT
+    er.window_key,
+    er.subscription_id,
+    er.customer_id,
+    er.price_id,
+    pm.tier_name
+  FROM end_ranked er
+  LEFT JOIN price_map pm
+    ON pm.price_id = er.price_id
+  WHERE er.exposure_rank = 1
+),
+
+-- Includes a replacement subscription or a migration to any other core tier.
+end_core_customers AS (
+  SELECT DISTINCT
+    window_key,
+    customer_id
+  FROM end_plan
+  WHERE tier_name IS NOT NULL
+),
+
+classified AS (
+  SELECT
+    sb.window_key,
+    sb.window_days,
+    sb.start_at,
+    sb.end_at,
+    sb.subscription_id,
+    sb.customer_id,
+    sb.tier_name,
+    sb.tier_order,
+
+    CASE
+      WHEN sb.ended_at &gt;= sb.start_at
+       AND sb.ended_at &lt; sb.end_at
+      THEN 1 ELSE 0
+    END AS gross_subscription_end_flag,
+
+    CASE
+      WHEN ep.subscription_id IS NULL
+        OR ep.tier_name IS NULL
+        OR ep.tier_name &lt;&gt; sb.tier_name
+      THEN 1 ELSE 0
+    END AS tier_exit_flag,
+
+    CASE
+      WHEN ecc.customer_id IS NULL
+      THEN 1 ELSE 0
+    END AS monthly_core_service_loss_flag,
+
+    CASE
+      WHEN sb.ended_at &gt;= sb.start_at
+       AND sb.ended_at &lt; sb.end_at
+       AND ecc.customer_id IS NULL
+      THEN 1 ELSE 0
+    END AS event_monthly_core_logo_loss_flag
+  FROM start_base sb
+  LEFT JOIN end_plan ep
+    ON ep.window_key = sb.window_key
+   AND ep.subscription_id = sb.subscription_id
+  LEFT JOIN end_core_customers ecc
+    ON ecc.window_key = sb.window_key
+   AND ecc.customer_id = sb.customer_id
+),
+
+tier_counts AS (
+  SELECT
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at,
+    pm.tier_name,
+    pm.tier_order,
+
+    COUNT(c.subscription_id)
+      AS paid_subscriptions_at_start,
+
+    COUNT(
+      CASE WHEN c.gross_subscription_end_flag = 1 THEN 1 END
+    ) AS gross_subscription_ends,
+
+    COUNT(
+      CASE WHEN c.tier_exit_flag = 1 THEN 1 END
+    ) AS tier_exits,
+
+    COUNT(DISTINCT c.customer_id)
+      AS paying_logos_at_start,
+
+    COUNT(
+      DISTINCT CASE
+        WHEN c.event_monthly_core_logo_loss_flag = 1 THEN c.customer_id
+      END
+    ) AS event_monthly_core_logos_lost,
+
+    COUNT(
+      DISTINCT CASE
+        WHEN c.monthly_core_service_loss_flag = 1 THEN c.customer_id
+      END
+    ) AS monthly_core_service_logos_lost
+  FROM windows w
+  CROSS JOIN price_map pm
+  LEFT JOIN classified c
+    ON c.window_key = w.window_key
+   AND c.tier_name = pm.tier_name
+  GROUP BY
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at,
+    pm.tier_name,
+    pm.tier_order
+),
+
+total_counts AS (
+  SELECT
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at,
+    'All 4 tiers' AS tier_name,
+    99 AS tier_order,
+
+    COUNT(c.subscription_id)
+      AS paid_subscriptions_at_start,
+
+    COUNT(
+      CASE WHEN c.gross_subscription_end_flag = 1 THEN 1 END
+    ) AS gross_subscription_ends,
+
+    COUNT(
+      CASE WHEN c.tier_exit_flag = 1 THEN 1 END
+    ) AS tier_exits,
+
+    COUNT(DISTINCT c.customer_id)
+      AS paying_logos_at_start,
+
+    COUNT(
+      DISTINCT CASE
+        WHEN c.event_monthly_core_logo_loss_flag = 1 THEN c.customer_id
+      END
+    ) AS event_monthly_core_logos_lost,
+
+    COUNT(
+      DISTINCT CASE
+        WHEN c.monthly_core_service_loss_flag = 1 THEN c.customer_id
+      END
+    ) AS monthly_core_service_logos_lost
+  FROM windows w
+  LEFT JOIN classified c
+    ON c.window_key = w.window_key
+  GROUP BY
+    w.window_key,
+    w.window_days,
+    w.start_at,
+    w.end_at
+),
+
+report_rows AS (
+  SELECT * FROM tier_counts
+  UNION ALL
+  SELECT * FROM total_counts
+)
+
+SELECT
+  window_key AS "Window",
+  start_at AS "Start UTC",
+  end_at AS "End UTC",
+  tier_name AS "Start Tier",
+
+  paid_subscriptions_at_start
+    AS "Paid Subscriptions At Start",
+
+  gross_subscription_ends
+    AS "Gross Subscription Ends",
+
+  ROUND(
+    100.0 * CAST(gross_subscription_ends AS DOUBLE)
+    / NULLIF(CAST(paid_subscriptions_at_start AS DOUBLE), 0.0),
+    3
+  ) AS "Gross Subscription Churn %",
+
+  tier_exits
+    AS "Original Tier Exits",
+
+  ROUND(
+    100.0 * CAST(tier_exits AS DOUBLE)
+    / NULLIF(CAST(paid_subscriptions_at_start AS DOUBLE), 0.0),
+    3
+  ) AS "Tier Exit %",
+
+  paying_logos_at_start
+    AS "Paying Logos At Start",
+
+  event_monthly_core_logos_lost
+    AS "Ended And Not On Canonical Monthly Tier Logos",
+
+  ROUND(
+    100.0 * CAST(event_monthly_core_logos_lost AS DOUBLE)
+    / NULLIF(CAST(paying_logos_at_start AS DOUBLE), 0.0),
+    3
+  ) AS "Event-Based Monthly-Core Logo Loss %",
+
+  monthly_core_service_logos_lost
+    AS "No Canonical Monthly Service At End Logos",
+
+  ROUND(
+    100.0 * CAST(monthly_core_service_logos_lost AS DOUBLE)
+    / NULLIF(CAST(paying_logos_at_start AS DOUBLE), 0.0),
+    3
+  ) AS "Point-In-Time Monthly-Core Service Loss %"
+
+FROM report_rows
+ORDER BY
+  window_days,
+  tier_order;
+
+-- ============================================================================
+-- QUERY C: CUMULATIVE SINCE-LAUNCH DISPOSITION
+-- ============================================================================
+-- This is intentionally separate from Query A.
+--
+-- It assigns each subscription to its first successfully paid canonical
+-- monthly tier after launch. It also assigns each Stripe customer ID to an
+-- exclusive first-paid entry tier for deduplicated logo reporting.
+--
+-- The result is a cumulative, varying-exposure cohort. It is NOT a monthly
+-- churn rate and must not be annualized.
+--
+-- Price objects were created on March 25. First successful paid service began:
+--   Starter: 2026-03-25 16:19:56 UTC
+--   Agency:  2026-03-25 19:32:25 UTC
+--   Pro:     2026-03-26 10:59:03 UTC
+--   Team:    2026-03-26 15:51:41 UTC
+
+WITH
+params (
+  report_end
+) AS (
+  VALUES (TIMESTAMP '2026-08-31 11:47:21')
+),
+
+price_map (
+  price_id,
+  tier_name,
+  tier_order,
+  price_created_at
+) AS (
+  VALUES
+    (
+      'price_1TEsavLnfBBzdwXDdu5OJYuB',
+      'Starter ($29/month)',
+      1,
+      TIMESTAMP '2026-03-25 14:39:41'
+    ),
+    (
+      'price_1TEseyLnfBBzdwXDH1RcdZ4e',
+      'Pro ($49/month)',
+      2,
+      TIMESTAMP '2026-03-25 14:43:52'
+    ),
+    (
+      'price_1TEshlLnfBBzdwXDvx4og8u2',
+      'Team ($79/month)',
+      3,
+      TIMESTAMP '2026-03-25 14:46:45'
+    ),
+    (
+      'price_1TEsn9LnfBBzdwXDFSJEiV43',
+      'Agency ($129/month)',
+      4,
+      TIMESTAMP '2026-03-25 14:52:19'
+    )
+),
+
+-- Keep this catalog versioned. It contains recognized canonical monthly,
+-- alternate, annual, and historical PLAN products. Do not add unrelated
+-- recurring add-ons.
+tier_products (
+  product_id
+) AS (
+  VALUES
+    ('prod_UDJDtFxubsIPoy'),
+    ('prod_UDJHllai95Kctx'),
+    ('prod_UDJK8joVZdKA2v'),
+    ('prod_UDJPq8QO3CSEqw'),
+    ('prod_V1TMh6R6BurXyK'),
+    ('prod_V1TMwh6fY22bRz'),
+    ('prod_V18RAT8yxl306P'),
+    ('prod_UDJEb3IVCo8YwS'),
+    ('prod_UDJI7cHycrzzXv'),
+    ('prod_UDJOwzRHZDvbSj'),
+    ('prod_UDJR22dmPhY9xz'),
+    ('prod_Q7Joa1kkMcB1gk'),
+    ('prod_Q7JqaK1458BEIf'),
+    ('prod_SthqEojqp9ZxwW'),
+    ('prod_StiB20a4BX7lCn'),
+    ('prod_StiRvbIyc1ILw4'),
+    ('prod_TY1QdobsRqfrnY'),
+    ('prod_Tc6fMOFljdu4tu'),
+    ('prod_Tc6vzeJE3vmtLQ'),
+    ('prod_RQDh61VAmeLbS6'),
+    ('prod_RGVC1NUzm3BnPY'),
+    ('prod_RGVE3jAEvadqbw'),
+    ('prod_RGVI00SezdDn0z'),
+    ('prod_Qi1iL0E4TC4PFO'),
+    ('prod_RGVKY6YQxMcVro'),
+    ('prod_Qi1l4RkKllNNnS'),
+    ('prod_TRkdcRzTLMane8'),
+    ('prod_StiGimjMKy4dHh'),
+    ('prod_Sti47zaxNhfOC9'),
+    ('prod_TY1XCKtE7vhSsq'),
+    ('prod_Tc70WdTtS5LKRb'),
+    ('prod_StiVEPEDQ0Cijr'),
+    ('prod_SUU91xIS11CA5S')
+),
+
+paid_recurring_exposures AS (
+  SELECT
+    i.subscription_id,
+    s.customer_id,
+    ili.id AS invoice_line_id,
+    i.id AS invoice_id,
+    ili.plan_id AS price_id,
+    pr.product_id,
+    COALESCE(i.status_transitions_paid_at, i.date) AS paid_at,
+    ili.period_start,
+    ili.period_end,
+    s.created AS subscription_created,
+    s.ended_at
+  FROM invoices i
+  INNER JOIN invoice_line_items ili
+    ON ili.invoice_id = i.id
+  INNER JOIN prices pr
+    ON pr.id = ili.plan_id
+  INNER JOIN tier_products tp
+    ON tp.product_id = pr.product_id
+  INNER JOIN subscriptions s
+    ON s.id = i.subscription_id
+  WHERE i.subscription_id IS NOT NULL
+    AND i.status = 'paid'
+    AND COALESCE(i.amount_paid, 0) &gt; 0
+    AND ili.type = 'subscription'
+    AND COALESCE(ili.amount, 0) &gt; 0
+    AND ili.period_end &gt; ili.period_start
+),
+
+launch_baseline AS (
+  SELECT
+    pm.price_id,
+    pm.tier_name,
+    pm.tier_order,
+    pm.price_created_at,
+    MIN(pe.period_start) AS metric_launch_at,
+    MIN(pe.paid_at) AS first_successful_payment_at
+  FROM price_map pm
+  CROSS JOIN params p
+  LEFT JOIN paid_recurring_exposures pe
+    ON pe.price_id = pm.price_id
+   AND pe.paid_at &lt; p.report_end
+   AND pe.period_start &lt; p.report_end
+   AND pe.paid_at &gt;= pm.price_created_at
+   AND pe.period_start &gt;= pm.price_created_at
+   AND (
+     pe.ended_at IS NULL
+     OR pe.paid_at &lt;= pe.ended_at
+   )
+  GROUP BY
+    pm.price_id,
+    pm.tier_name,
+    pm.tier_order,
+    pm.price_created_at
+),
+
+subscription_entry_ranked AS (
+  SELECT
+    p.report_end,
+    pe.*,
+    pm.tier_name,
+    pm.tier_order,
+    ROW_NUMBER() OVER (
+      PARTITION BY pe.subscription_id
+      ORDER BY
+        pe.period_start ASC,
+        pe.paid_at ASC,
+        pe.period_end ASC,
+        pm.tier_order ASC,
+        pe.invoice_id ASC,
+        pe.invoice_line_id ASC
+    ) AS entry_rank
+  FROM params p
+  INNER JOIN paid_recurring_exposures pe
+    ON pe.paid_at &lt; p.report_end
+   AND pe.period_start &lt; p.report_end
+  INNER JOIN price_map pm
+    ON pm.price_id = pe.price_id
+   AND pe.paid_at &gt;= pm.price_created_at
+   AND pe.period_start &gt;= pm.price_created_at
+  WHERE pe.subscription_created &lt; p.report_end
+    -- Prevent a payment arriving only after termination from retroactively
+    -- making a subscription "paid before it was lost."
+    AND (
+      pe.ended_at IS NULL
+      OR pe.paid_at &lt;= pe.ended_at
+    )
+),
+
+subscription_entry_base AS (
+  SELECT
+    report_end,
+    subscription_id,
+    customer_id,
+    ended_at,
+    tier_name,
+    tier_order,
+    period_start AS entry_at,
+    period_end AS entry_period_end,
+    paid_at AS entry_paid_at
+  FROM subscription_entry_ranked
+  WHERE entry_rank = 1
+),
+
+customer_entry_ranked AS (
+  SELECT
+    seb.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY seb.customer_id
+      ORDER BY
+        seb.entry_at ASC,
+        seb.entry_paid_at ASC,
+        seb.entry_period_end ASC,
+        seb.tier_order ASC,
+        seb.subscription_id ASC
+    ) AS customer_entry_rank
+  FROM subscription_entry_base seb
+),
+
+customer_entry_base AS (
+  SELECT *
+  FROM customer_entry_ranked
+  WHERE customer_entry_rank = 1
+),
+
+end_ranked AS (
+  SELECT
+    p.report_end,
+    pe.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY pe.subscription_id
+      ORDER BY
+        pe.paid_at DESC,
+        pe.period_start DESC,
+        pe.period_end DESC,
+        pe.invoice_id DESC,
+        pe.invoice_line_id DESC
+    ) AS exposure_rank
+  FROM params p
+  INNER JOIN paid_recurring_exposures pe
+    ON pe.paid_at &lt; p.report_end
+   AND pe.period_start &lt;= p.report_end
+   AND pe.period_end &gt; p.report_end
+  WHERE pe.subscription_created &lt; p.report_end
+    AND (
+      pe.ended_at IS NULL
+      OR pe.ended_at &gt; p.report_end
+    )
+),
+
+-- A recognized noncanonical plan can win the end rank. The LEFT JOIN makes it
+-- a canonical-monthly portfolio exit instead of allowing an older core line
+-- to hide the migration.
+end_plan AS (
+  SELECT
+    er.subscription_id,
+    er.customer_id,
+    pm.tier_name
+  FROM end_ranked er
+  LEFT JOIN price_map pm
+    ON pm.price_id = er.price_id
+  WHERE er.exposure_rank = 1
+),
+
+end_core_customers AS (
+  SELECT DISTINCT
+    customer_id
+  FROM end_plan
+  WHERE tier_name IS NOT NULL
+),
+
+subscription_classified AS (
+  SELECT
+    seb.*,
+    CASE
+      WHEN seb.ended_at &gt;= seb.entry_at
+       AND seb.ended_at &lt; seb.report_end
+      THEN 1 ELSE 0
+    END AS terminal_end_flag,
+    CASE
+      WHEN ep.subscription_id IS NULL
+        OR ep.tier_name IS NULL
+        OR ep.tier_name &lt;&gt; seb.tier_name
+      THEN 1 ELSE 0
+    END AS original_tier_exit_flag
+  FROM subscription_entry_base seb
+  LEFT JOIN end_plan ep
+    ON ep.subscription_id = seb.subscription_id
+),
+
+customer_classified AS (
+  SELECT
+    ceb.*,
+    CASE
+      WHEN ecc.customer_id IS NULL
+      THEN 1 ELSE 0
+    END AS monthly_core_service_loss_flag
+  FROM customer_entry_base ceb
+  LEFT JOIN end_core_customers ecc
+    ON ecc.customer_id = ceb.customer_id
+),
+
+tier_subscription_counts AS (
+  SELECT
+    pm.tier_name,
+    pm.tier_order,
+    COUNT(sc.subscription_id)
+      AS ever_paid_subscriptions_since_launch,
+    COUNT(
+      CASE WHEN sc.terminal_end_flag = 1 THEN 1 END
+    ) AS terminal_subscription_ends,
+    COUNT(
+      CASE WHEN sc.original_tier_exit_flag = 1 THEN 1 END
+    ) AS original_tier_exits_at_cutoff
+  FROM price_map pm
+  LEFT JOIN subscription_classified sc
+    ON sc.tier_name = pm.tier_name
+  GROUP BY
+    pm.tier_name,
+    pm.tier_order
+),
+
+tier_customer_counts AS (
+  SELECT
+    pm.tier_name,
+    pm.tier_order,
+    COUNT(cc.customer_id)
+      AS ever_paid_logos_since_launch,
+    COUNT(
+      CASE WHEN cc.monthly_core_service_loss_flag = 0 THEN 1 END
+    ) AS retained_on_canonical_monthly_logos,
+    COUNT(
+      CASE WHEN cc.monthly_core_service_loss_flag = 1 THEN 1 END
+    ) AS no_canonical_monthly_service_at_cutoff_logos
+  FROM price_map pm
+  LEFT JOIN customer_classified cc
+    ON cc.tier_name = pm.tier_name
+  GROUP BY
+    pm.tier_name,
+    pm.tier_order
+),
+
+tier_rows AS (
+  SELECT
+    'Since launch' AS window_key,
+    pm.tier_name,
+    pm.tier_order,
+    lb.price_created_at,
+    lb.metric_launch_at,
+    lb.first_successful_payment_at,
+    tsc.ever_paid_subscriptions_since_launch,
+    tsc.terminal_subscription_ends,
+    tsc.original_tier_exits_at_cutoff,
+    tcc.ever_paid_logos_since_launch,
+    tcc.retained_on_canonical_monthly_logos,
+    tcc.no_canonical_monthly_service_at_cutoff_logos
+  FROM price_map pm
+  INNER JOIN launch_baseline lb
+    ON lb.price_id = pm.price_id
+  INNER JOIN tier_subscription_counts tsc
+    ON tsc.tier_name = pm.tier_name
+  INNER JOIN tier_customer_counts tcc
+    ON tcc.tier_name = pm.tier_name
+),
+
+-- Aggregate subscription and customer totals independently so the deduplicated
+-- total cannot create a many-to-many cross product.
+total_subscription_counts AS (
+  SELECT
+    COUNT(subscription_id)
+      AS ever_paid_subscriptions_since_launch,
+    COUNT(
+      CASE WHEN terminal_end_flag = 1 THEN 1 END
+    ) AS terminal_subscription_ends,
+    COUNT(
+      CASE WHEN original_tier_exit_flag = 1 THEN 1 END
+    ) AS original_tier_exits_at_cutoff
+  FROM subscription_classified
+),
+
+total_customer_counts AS (
+  SELECT
+    COUNT(customer_id)
+      AS ever_paid_logos_since_launch,
+    COUNT(
+      CASE WHEN monthly_core_service_loss_flag = 0 THEN 1 END
+    ) AS retained_on_canonical_monthly_logos,
+    COUNT(
+      CASE WHEN monthly_core_service_loss_flag = 1 THEN 1 END
+    ) AS no_canonical_monthly_service_at_cutoff_logos
+  FROM customer_classified
+),
+
+safe_total_row AS (
+  SELECT
+    'Since launch' AS window_key,
+    'All 4 tiers' AS tier_name,
+    99 AS tier_order,
+    MIN(lb.price_created_at) AS price_created_at,
+    MIN(lb.metric_launch_at) AS metric_launch_at,
+    MIN(lb.first_successful_payment_at) AS first_successful_payment_at,
+    tsc.ever_paid_subscriptions_since_launch,
+    tsc.terminal_subscription_ends,
+    tsc.original_tier_exits_at_cutoff,
+    tcc.ever_paid_logos_since_launch,
+    tcc.retained_on_canonical_monthly_logos,
+    tcc.no_canonical_monthly_service_at_cutoff_logos
+  FROM launch_baseline lb
+  CROSS JOIN total_subscription_counts tsc
+  CROSS JOIN total_customer_counts tcc
+  GROUP BY
+    tsc.ever_paid_subscriptions_since_launch,
+    tsc.terminal_subscription_ends,
+    tsc.original_tier_exits_at_cutoff,
+    tcc.ever_paid_logos_since_launch,
+    tcc.retained_on_canonical_monthly_logos,
+    tcc.no_canonical_monthly_service_at_cutoff_logos
+),
+
+report_rows AS (
+  SELECT * FROM tier_rows
+  UNION ALL
+  SELECT * FROM safe_total_row
+)
+
+SELECT
+  window_key AS "Window",
+  tier_name AS "Entry Tier",
+  price_created_at AS "Price Created UTC",
+  metric_launch_at AS "First Paid Service UTC",
+  first_successful_payment_at AS "First Successful Payment UTC",
+
+  ever_paid_subscriptions_since_launch
+    AS "Ever-Paid Subscriptions Since Launch",
+
+  terminal_subscription_ends
+    AS "Terminal Subscription Ends",
+
+  ROUND(
+    100.0 * CAST(terminal_subscription_ends AS DOUBLE)
+    / NULLIF(
+        CAST(ever_paid_subscriptions_since_launch AS DOUBLE),
+        0.0
+      ),
+    3
+  ) AS "Cumulative Gross Subscription Attrition %",
+
+  original_tier_exits_at_cutoff
+    AS "Original Tier Exits At Cutoff",
+
+  ever_paid_logos_since_launch
+    AS "Ever-Paid Logos Since Launch",
+
+  retained_on_canonical_monthly_logos
+    AS "Retained On Canonical Monthly At Cutoff Logos",
+
+  no_canonical_monthly_service_at_cutoff_logos
+    AS "No Canonical Monthly Service At Cutoff Logos",
+
+  ROUND(
+    100.0 * CAST(
+      no_canonical_monthly_service_at_cutoff_logos
+      AS DOUBLE
+    )
+    / NULLIF(
+        CAST(ever_paid_logos_since_launch AS DOUBLE),
+        0.0
+      ),
+    3
+  ) AS "Cumulative Monthly-Core Service Loss %"
+
+FROM report_rows
+ORDER BY tier_order;
+
+-- Query C acceptance checks at the frozen cutoff:
+--   Starter: 5,117 entrant subs / 2,512 terminal ends / 49.091%;
+--            4,834 entrant customer IDs / 2,456 retained / 2,378 not
+--            retained / 49.193% monthly-core service loss.
+--   Pro:     1,699 / 929 / 54.679%; 1,665 / 763 / 902 / 54.174%.
+--   Team:    1,234 / 448 / 36.305%; 1,195 / 750 / 445 / 37.238%.
+--   Agency:  113 / 39 / 34.513%; 111 / 74 / 37 / 33.333%.
+--   Total:   8,163 / 3,928 / 48.120%; 7,805 / 4,043 / 3,762 / 48.200%.
+
+
+-- ============================================================================
+-- QUERY D: FROZEN CLAUDE-VS-AUDITED RECONCILIATION
+-- ============================================================================
+-- Query B's live status denominator will drift on rerun. These VALUES preserve
+-- the exact HTML snapshot and join it conceptually to Query A's frozen
+-- acceptance cells. The definitions differ; percentage deltas are diagnostic.
+
+WITH
+comparison (
+  window_key,
+  tier_name,
+  claude_end_status_base,
+  claude_paid_end_events,
+  claude_ended_share_pct,
+  audited_cohort_denominator,
+  audited_gross_ends,
+  audited_gross_churn_pct
+) AS (
+  VALUES
+    ('30d','Starter ($29/month)',2566,720,21.911,2242,620,27.654),
+    ('30d','Pro ($49/month)',702,225,24.272,733,209,28.513),
+    ('30d','Team ($79/month)',985,197,16.667,660,150,22.727),
+    ('30d','Agency ($129/month)',161,20,11.050,31,3,9.677),
+    ('30d','All 4 tiers',4414,1162,20.839,3666,982,26.787),
+    ('120d','Starter ($29/month)',2566,2429,48.629,978,685,70.041),
+    ('120d','Pro ($49/month)',702,862,55.115,388,258,66.495),
+    ('120d','Team ($79/month)',985,486,33.039,121,59,48.760),
+    ('120d','Agency ($129/month)',161,51,24.057,19,12,63.158),
+    ('120d','All 4 tiers',4414,3828,46.445,1506,1014,67.331),
+    ('since_launch','Starter ($29/month)',2566,2510,49.448,5117,2512,49.091),
+    ('since_launch','Pro ($49/month)',702,907,56.370,1699,929,54.679),
+    ('since_launch','Team ($79/month)',985,497,33.536,1234,448,36.305),
+    ('since_launch','Agency ($129/month)',161,57,26.147,113,39,34.513),
+    ('since_launch','All 4 tiers',4414,3971,47.358,8163,3928,48.120)
+)
+
+SELECT
+  window_key AS "Window",
+  tier_name AS "Tier",
+  claude_end_status_base AS "Claude End Status Base",
+  claude_paid_end_events AS "Claude Paid End Events",
+  claude_ended_share_pct AS "Claude Ended Share %",
+  audited_cohort_denominator AS "Audited Cohort Denominator",
+  audited_gross_ends AS "Audited Gross Ends",
+  audited_gross_churn_pct AS "Audited Gross Churn %",
+  ROUND(
+    audited_gross_churn_pct - claude_ended_share_pct,
+    3
+  ) AS "Percentage-Point Difference",
+  CASE
+    WHEN window_key = 'since_launch'
+    THEN 'Epoch-zero end-survivor share vs Mar-25/26 cumulative paid-entry cohort; definitions differ'
+    ELSE 'End-survivor ended-share vs fixed paid start cohort; definitions differ'
+  END AS "Comparison Note"
+FROM comparison
+ORDER BY
+  CASE window_key
+    WHEN '30d' THEN 30
+    WHEN '120d' THEN 120
+    ELSE 999
+  END,
+  CASE tier_name
+    WHEN 'Starter ($29/month)' THEN 1
+    WHEN 'Pro ($49/month)' THEN 2
+    WHEN 'Team ($79/month)' THEN 3
+    WHEN 'Agency ($129/month)' THEN 4
+    ELSE 99
+  END;
+
+-- Query C/D limitations to disclose:
+--   1. This is canonical-monthly portfolio loss, not whole-business logo churn.
+--   2. Positive invoices are not net of later refunds or disputes.
+--   3. Version the 33-product migration-detection catalog.
+--   4. Cumulative launch attrition is not a monthly rate.
+--   5. Record Sigma data_load_time with every export.
+--   6. If invoice_line_items exposes price_id instead of plan_id, replace the
+--      relevant ili.plan_id references. subscription_items.price_id remains.
+--   7. Never put add-on products in tier_products.</code></pre>
+      </details>
+      <details>
+        <summary>Claude formula reproduction SQL</summary>
+        <div class="sql-meta">Reconciliation only. This intentionally recreates the end-survivor denominator and should not be used as the corrected churn definition.</div>
+        <div class="sql-toolbar"><span class="copy-status" id="copy-status-claude" aria-live="polite"></span><button class="copy-btn" type="button" data-copy="sql-claude" data-status="copy-status-claude">Copy SQL</button></div>
+        <pre><code id="sql-claude">-- ============================================================================
+-- QUERY B: REPRODUCE CLAUDE'S ENDED-SHARE DEFINITION
+-- ============================================================================
+-- Reproduces:
+--
+--                   paid canceled subscriptions
+--   ------------------------------------------------------------------
+--   active + past_due subscriptions + paid canceled subscriptions
+--
+-- This intentionally uses a final/current subscription-item tier and accepts
+-- any positive paid invoice anywhere in the subscription history. It is for
+-- reconciliation only; it is not the recommended business churn definition.
+--
+-- Snapshot caveat: Claude's status denominator was live at the report pull.
+-- Sigma reruns later will drift because subscriptions.status is not historical.
+
+WITH
+windows (
+  window_key,
+  window_days,
+  start_at,
+  end_at
+) AS (
+  VALUES
+    (
+      '30d', 30,
+      TIMESTAMP '2026-08-01 11:47:21',
+      TIMESTAMP '2026-08-31 11:47:21'
+    ),
+    (
+      '120d', 120,
+      TIMESTAMP '2026-05-03 11:47:21',
+      TIMESTAMP '2026-08-31 11:47:21'
+    )
+),
+
+price_map (
+  price_id,
+  tier_name,
+  tier_order
+) AS (
+  VALUES
+    ('price_1TEsavLnfBBzdwXDdu5OJYuB', 'Starter ($29/month)', 1),
+    ('price_1TEseyLnfBBzdwXDH1RcdZ4e', 'Pro ($49/month)',     2),
+    ('price_1TEshlLnfBBzdwXDvx4og8u2', 'Team ($79/month)',   3),
+    ('price_1TEsn9LnfBBzdwXDFSJEiV43', 'Agency ($129/month)', 4)
+),
+
+final_core_plan AS (
+  SELECT DISTINCT
+    s.id AS subscription_id,
+    s.customer_id,
+    s.status,
+    s.ended_at,
+    s.trial_end,
+    pm.tier_name,
+    pm.tier_order
+  FROM subscriptions s
+  INNER JOIN subscription_items si
+    ON si.subscription_id = s.id
+  INNER JOIN price_map pm
+    ON pm.price_id = si.price_id
+),
+
+ever_paid_before_snapshot AS (
+  SELECT DISTINCT
+    i.subscription_id
+  FROM invoices i
+  WHERE i.subscription_id IS NOT NULL
+    AND i.status = 'paid'
+    AND COALESCE(i.amount_paid, 0) &gt; 0
+    AND COALESCE(i.status_transitions_paid_at, i.date)
+          &lt; TIMESTAMP '2026-08-31 11:47:21'
+),
+
+paying_now AS (
+  SELECT
+    tier_name,
+    tier_order,
+    COUNT(DISTINCT subscription_id) AS paying_subscriptions_now
+  FROM final_core_plan
+  WHERE status IN ('active', 'past_due')
+  GROUP BY tier_name, tier_order
+),
+
+paid_cancels AS (
+  SELECT DISTINCT
+    w.window_key,
+    w.window_days,
+    fp.tier_name,
+    fp.tier_order,
+    fp.subscription_id
+  FROM windows w
+  INNER JOIN final_core_plan fp
+    ON fp.ended_at &gt;= w.start_at
+   AND fp.ended_at &lt; w.end_at
+  INNER JOIN ever_paid_before_snapshot ep
+    ON ep.subscription_id = fp.subscription_id
+  WHERE fp.status = 'canceled'
+    AND NOT (
+      fp.trial_end IS NOT NULL
+      AND fp.ended_at &lt;= fp.trial_end + INTERVAL '1' HOUR
+    )
+),
+
+tier_counts AS (
+  SELECT
+    w.window_key,
+    w.window_days,
+    pm.tier_name,
+    pm.tier_order,
+    COALESCE(pn.paying_subscriptions_now, 0)
+      AS paying_subscriptions_now,
+    COUNT(DISTINCT pc.subscription_id)
+      AS paid_subscriptions_ended
+  FROM windows w
+  CROSS JOIN price_map pm
+  LEFT JOIN paying_now pn
+    ON pn.tier_name = pm.tier_name
+  LEFT JOIN paid_cancels pc
+    ON pc.window_key = w.window_key
+   AND pc.tier_name = pm.tier_name
+  GROUP BY
+    w.window_key,
+    w.window_days,
+    pm.tier_name,
+    pm.tier_order,
+    pn.paying_subscriptions_now
+),
+
+report_rows AS (
+  SELECT * FROM tier_counts
+
+  UNION ALL
+
+  SELECT
+    window_key,
+    window_days,
+    'All 4 tiers' AS tier_name,
+    99 AS tier_order,
+    SUM(paying_subscriptions_now) AS paying_subscriptions_now,
+    SUM(paid_subscriptions_ended) AS paid_subscriptions_ended
+  FROM tier_counts
+  GROUP BY window_key, window_days
+)
+
+SELECT
+  window_key AS "Window",
+  tier_name AS "Tier",
+  paying_subscriptions_now AS "Paying Subs Now",
+  paid_subscriptions_ended AS "Paid Subs Ended",
+  paying_subscriptions_now + paid_subscriptions_ended
+    AS "Claude Denominator",
+  ROUND(
+    100.0 * CAST(paid_subscriptions_ended AS DOUBLE)
+    / NULLIF(
+        CAST(
+          paying_subscriptions_now + paid_subscriptions_ended
+          AS DOUBLE
+        ),
+        0.0
+      ),
+    1
+  ) AS "Claude Ended Share %"
+FROM report_rows
+ORDER BY
+  window_days,
+  tier_order;
+
+-- Snapshot acceptance checks for Query B:
+--   30d total:  4,414 live + 1,162 ended -&gt; 20.8%
+--   120d total: 4,414 live + 3,828 ended -&gt; 46.4%
+--   30d ended:  Starter 720, Pro 225, Team 197, Agency 20
+--   120d ended: Starter 2,429, Pro 862, Team 486, Agency 51</code></pre>
+      </details>
+    </div>
+  </section>
+
+  <footer class="provenance">
+    Frozen cutoff: <code>2026-08-31 11:47:21 UTC</code> / <code>2026-08-31 19:47:21 Asia/Manila</code>. Customer dedupe key: Stripe customer ID. Read-only audit; no Stripe records were changed.
+  </footer>
+</main>
+
+<script>
+"use strict";
+
+const REPORT = {
+  windows: [
+    {
+      id: "w30",
+      mode: "fixed",
+      dateHtml: "Aug 01, 2026 11:47:21 UTC &rarr; Aug 31, 2026 11:47:21 UTC (trailing 30 days)",
+      cards: [
+        {value:"26.8%",label:"Gross subscription churn",tip:"982 paid start-cohort subscriptions ended out of 3,666. Exact rate: 26.787%."},
+        {value:"3,666",label:"Paid subscriptions at start",tip:"Positive paid canonical monthly invoice-line service covering the start boundary, with one exclusive plan assignment per subscription."},
+        {value:"982",label:"Start-cohort subscriptions ended",tip:"Paid start-cohort subscriptions whose Stripe ended_at timestamp falls inside the half-open 30-day window."},
+        {value:"30.1%",label:"Monthly-core service loss",tip:"1,102 of 3,666 start customer IDs had no positive paid canonical monthly service at the cutoff. Exact rate: 30.060%."}
+      ],
+      rows: [
+        {plan:"Starter ($29/month)",start:2242,ended:620,gross:27.654,eventLost:596,eventRate:26.583,pointLost:697,pointRate:31.088},
+        {plan:"Pro ($49/month)",start:733,ended:209,gross:28.513,eventLost:207,eventRate:28.240,pointLost:230,pointRate:31.378},
+        {plan:"Team ($79/month)",start:660,ended:150,gross:22.727,eventLost:142,eventRate:21.515,pointLost:172,pointRate:26.061},
+        {plan:"Agency ($129/month)",start:31,ended:3,gross:9.677,eventLost:3,eventRate:9.677,pointLost:3,pointRate:9.677},
+        {plan:"All 4 tiers",start:3666,ended:982,gross:26.787,eventLost:948,eventRate:25.859,pointLost:1102,pointRate:30.060,total:true}
+      ]
+    },
+    {
+      id: "w120",
+      mode: "fixed",
+      dateHtml: "May 03, 2026 11:47:21 UTC &rarr; Aug 31, 2026 11:47:21 UTC (trailing 120 days)",
+      cards: [
+        {value:"67.3%",label:"Gross subscription churn",tip:"1,014 paid start-cohort subscriptions ended out of 1,506. Exact rate: 67.331%."},
+        {value:"1,506",label:"Paid subscriptions at start",tip:"Positive paid canonical monthly invoice-line service covering the start boundary, with one exclusive plan assignment per subscription."},
+        {value:"1,014",label:"Start-cohort subscriptions ended",tip:"Paid start-cohort subscriptions whose Stripe ended_at timestamp falls inside the half-open 120-day window."},
+        {value:"63.5%",label:"Monthly-core service loss",tip:"956 of 1,506 start customer IDs had no positive paid canonical monthly service at the cutoff. Exact rate: 63.479%."}
+      ],
+      rows: [
+        {plan:"Starter ($29/month)",start:978,ended:685,gross:70.041,eventLost:628,eventRate:64.213,pointLost:642,pointRate:65.644},
+        {plan:"Pro ($49/month)",start:388,ended:258,gross:66.495,eventLost:237,eventRate:61.082,pointLost:248,pointRate:63.918},
+        {plan:"Team ($79/month)",start:121,ended:59,gross:48.760,eventLost:51,eventRate:42.149,pointLost:54,pointRate:44.628},
+        {plan:"Agency ($129/month)",start:19,ended:12,gross:63.158,eventLost:11,eventRate:57.895,pointLost:12,pointRate:63.158},
+        {plan:"All 4 tiers",start:1506,ended:1014,gross:67.331,eventLost:927,eventRate:61.554,pointLost:956,pointRate:63.479,total:true}
+      ]
+    },
+    {
+      id: "launch",
+      mode: "launch",
+      dateHtml: "First paid tier service Mar 25-26, 2026 &rarr; Aug 31, 2026 11:47:21 UTC (cumulative since launch)",
+      cards: [
+        {value:"48.2%",label:"Cumulative monthly-core loss",tip:"3,762 of 7,805 first-paid entry-cohort customer IDs had no paid canonical monthly service at the cutoff. Exact rate: 48.200%. This is not a monthly churn rate."},
+        {value:"7,805",label:"Paid customer entrants",tip:"Stripe customer IDs assigned exclusively to their first successfully paid canonical monthly tier after launch and before the frozen cutoff."},
+        {value:"3,762",label:"Not retained at cutoff",tip:"Entry-cohort customer IDs with no positive paid service on any of the four canonical monthly tiers at the frozen cutoff."},
+        {value:"4,043",label:"Retained at cutoff",tip:"Entry-cohort customer IDs with positive paid service on at least one canonical monthly tier at the frozen cutoff."}
+      ],
+      rows: [
+        {plan:"Starter ($29/month)",entrantSubs:5117,ended:2512,attritionRate:49.091,entrantCustomers:4834,retained:2456,notRetained:2378,exitRate:49.193},
+        {plan:"Pro ($49/month)",entrantSubs:1699,ended:929,attritionRate:54.679,entrantCustomers:1665,retained:763,notRetained:902,exitRate:54.174},
+        {plan:"Team ($79/month)",entrantSubs:1234,ended:448,attritionRate:36.305,entrantCustomers:1195,retained:750,notRetained:445,exitRate:37.238},
+        {plan:"Agency ($129/month)",entrantSubs:113,ended:39,attritionRate:34.513,entrantCustomers:111,retained:74,notRetained:37,exitRate:33.333},
+        {plan:"All 4 tiers",entrantSubs:8163,ended:3928,attritionRate:48.120,entrantCustomers:7805,retained:4043,notRetained:3762,exitRate:48.200,total:true}
+      ]
+    }
+  ],
+  comparison: [
+    {window:"30d",plan:"Starter",claude:21.911,audited:27.654},
+    {window:"30d",plan:"Pro",claude:24.272,audited:28.513},
+    {window:"30d",plan:"Team",claude:16.667,audited:22.727},
+    {window:"30d",plan:"Agency",claude:11.050,audited:9.677},
+    {window:"30d",plan:"All 4 tiers",claude:20.839,audited:26.787,total:true},
+    {window:"120d",plan:"Starter",claude:48.629,audited:70.041},
+    {window:"120d",plan:"Pro",claude:55.115,audited:66.495},
+    {window:"120d",plan:"Team",claude:33.039,audited:48.760},
+    {window:"120d",plan:"Agency",claude:24.057,audited:63.158},
+    {window:"120d",plan:"All 4 tiers",claude:46.445,audited:67.331,total:true},
+    {window:"Since launch*",plan:"Starter",claude:49.448,audited:49.091},
+    {window:"Since launch*",plan:"Pro",claude:56.370,audited:54.679},
+    {window:"Since launch*",plan:"Team",claude:33.536,audited:36.305},
+    {window:"Since launch*",plan:"Agency",claude:26.147,audited:34.513},
+    {window:"Since launch*",plan:"All 4 tiers",claude:47.358,audited:48.120,total:true}
+  ]
+};
+
+const countFormatter = new Intl.NumberFormat("en-US");
+let tooltipSequence = 0;
+
+function infoButton(label,tip){
+  tooltipSequence += 1;
+  const tooltipId = "tooltip-"+tooltipSequence;
+  return '<button class="info" type="button" aria-label="Explain '+label+'" aria-describedby="'+tooltipId+'" aria-expanded="false">i<span class="tip" id="'+tooltipId+'" role="tooltip">'+tip+'</span></button>';
+}
+
+function fixedTable(windowData){
+  const rows = windowData.rows.map(function(row){
+    return '<tr class="'+(row.total ? 'tot' : '')+'">'+
+      '<th scope="row">'+row.plan+'</th>'+
+      '<td>'+countFormatter.format(row.start)+'</td>'+
+      '<td>'+countFormatter.format(row.ended)+'</td>'+
+      '<td class="hl">'+row.gross.toFixed(3)+'%</td>'+
+      '<td>'+countFormatter.format(row.eventLost)+'</td>'+
+      '<td>'+row.eventRate.toFixed(3)+'%</td>'+
+      '<td>'+countFormatter.format(row.pointLost)+'</td>'+
+      '<td class="hl">'+row.pointRate.toFixed(3)+'%</td>'+
+    '</tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><caption>'+windowData.id+' audited metrics by exclusive start tier</caption>'+
+    '<thead><tr>'+
+      '<th scope="col">Plan</th>'+
+      '<th scope="col">Paid at start'+infoButton("paid at start","Positive paid recurring canonical monthly service covering the exact start boundary.")+'</th>'+
+      '<th scope="col">Subs ended'+infoButton("subscriptions ended","Start-cohort subscriptions with ended_at inside the half-open reporting window.")+'</th>'+
+      '<th scope="col" class="hl">Gross churn'+infoButton("gross churn","Subscriptions ended divided by paid subscriptions at start.")+'</th>'+
+      '<th scope="col">Event-lost logos'+infoButton("event-lost logos","Start customer IDs with an end event and no canonical monthly service at the cutoff.")+'</th>'+
+      '<th scope="col">Event loss</th>'+
+      '<th scope="col">No service at end'+infoButton("no service at end","All start customer IDs without paid canonical monthly service at the cutoff.")+'</th>'+
+      '<th scope="col" class="hl">Service loss</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function launchTable(windowData){
+  if(!windowData.rows.length){
+    return '<div class="adv"><strong>Calculating frozen launch cohort.</strong> The report will not be considered complete until these rows are populated from the full Stripe reconstruction.</div>';
+  }
+  const rows = windowData.rows.map(function(row){
+    return '<tr class="'+(row.total ? 'tot' : '')+'">'+
+      '<th scope="row">'+row.plan+'</th>'+
+      '<td>'+countFormatter.format(row.entrantSubs)+'</td>'+
+      '<td>'+countFormatter.format(row.ended)+'</td>'+
+      '<td>'+row.attritionRate.toFixed(3)+'%</td>'+
+      '<td>'+countFormatter.format(row.entrantCustomers)+'</td>'+
+      '<td>'+countFormatter.format(row.retained)+'</td>'+
+      '<td>'+countFormatter.format(row.notRetained)+'</td>'+
+      '<td class="hl">'+row.exitRate.toFixed(3)+'%</td>'+
+    '</tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><caption>Cumulative since-launch disposition by exclusive first paid tier</caption>'+
+    '<thead><tr>'+
+      '<th scope="col">First paid tier</th>'+
+      '<th scope="col">Paid entrant subs'+infoButton("paid entrant subscriptions","Each subscription is assigned exclusively to its first successfully paid canonical monthly tier after launch. Payments first arriving after ended_at are excluded.")+'</th>'+
+      '<th scope="col">Terminal ends</th>'+
+      '<th scope="col">Cumulative sub attrition</th>'+
+      '<th scope="col">Paid entrant customers'+infoButton("paid entrant customers","Each Stripe customer ID is assigned exclusively to its earliest paid entry across all subscriptions and canonical monthly tiers.")+'</th>'+
+      '<th scope="col">Retained on monthly core</th>'+
+      '<th scope="col">Not retained</th>'+
+      '<th scope="col" class="hl">Cumulative service loss</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function renderPanels(){
+  const root = document.getElementById("report-panels");
+  root.innerHTML = REPORT.windows.map(function(windowData,index){
+    const cards = windowData.cards.map(function(card){
+      return '<div class="card"><div class="n">'+card.value+'</div><div class="l">'+card.label+infoButton(card.label,card.tip)+'</div></div>';
+    }).join('');
+    const table = windowData.mode === "fixed" ? fixedTable(windowData) : launchTable(windowData);
+    return '<section class="panel" id="'+windowData.id+'" role="tabpanel" aria-labelledby="tab-'+windowData.id+'" '+(index ? 'hidden' : '')+'>'+
+      '<div class="datebar">Window: <b>'+windowData.dateHtml+'</b> · frozen Stripe cutoff <b>Aug 31, 2026</b></div>'+
+      '<div class="cards">'+cards+'</div>'+table+
+    '</section>';
+  }).join('');
+}
+
+function renderComparison(){
+  document.getElementById("comparison-body").innerHTML = REPORT.comparison.map(function(row){
+    const delta = row.audited-row.claude;
+    const cls = delta > 0 ? "delta-up" : "delta-down";
+    return '<tr class="'+(row.total ? 'tot' : '')+'">'+
+      '<td>'+row.window+'</td><th scope="row">'+row.plan+'</th>'+
+      '<td>'+row.claude.toFixed(3)+'%</td>'+
+      '<td class="hl">'+row.audited.toFixed(3)+'%</td>'+
+      '<td class="'+cls+'">'+(delta > 0 ? '+' : '')+delta.toFixed(3)+' pp</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function activateTab(tab){
+  document.querySelectorAll('[role="tab"]').forEach(function(candidate){
+    const active = candidate === tab;
+    candidate.classList.toggle("on",active);
+    candidate.setAttribute("aria-selected",String(active));
+    candidate.tabIndex = active ? 0 : -1;
+  });
+  document.querySelectorAll('[role="tabpanel"]').forEach(function(panel){
+    panel.hidden = panel.id !== tab.dataset.panel;
+  });
+}
+
+renderPanels();
+renderComparison();
+
+const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+tabs.forEach(function(tab,index){
+  tab.addEventListener("click",function(){activateTab(tab);});
+  tab.addEventListener("keydown",function(event){
+    let nextIndex = null;
+    if(event.key === "ArrowRight") nextIndex = (index+1)%tabs.length;
+    if(event.key === "ArrowLeft") nextIndex = (index-1+tabs.length)%tabs.length;
+    if(event.key === "Home") nextIndex = 0;
+    if(event.key === "End") nextIndex = tabs.length-1;
+    if(nextIndex !== null){
+      event.preventDefault();
+      activateTab(tabs[nextIndex]);
+      tabs[nextIndex].focus();
+    }
+  });
+});
+
+document.addEventListener("click",function(event){
+  const button = event.target.closest(".info");
+  document.querySelectorAll(".info.open").forEach(function(openButton){
+    if(openButton !== button){
+      openButton.classList.remove("open");
+      openButton.setAttribute("aria-expanded","false");
+    }
+  });
+  if(button){
+    const open = !button.classList.contains("open");
+    button.classList.toggle("open",open);
+    button.setAttribute("aria-expanded",String(open));
+  }
+});
+
+document.addEventListener("keydown",function(event){
+  if(event.key === "Escape"){
+    document.querySelectorAll(".info.open").forEach(function(button){
+      button.classList.remove("open");
+      button.setAttribute("aria-expanded","false");
+    });
+    if(document.activeElement && document.activeElement.classList.contains("info")){
+      document.activeElement.blur();
+    }
+  }
+});
+
+document.querySelectorAll("[data-copy]").forEach(function(button){
+  button.addEventListener("click",async function(){
+    const sql = document.getElementById(button.dataset.copy).innerText;
+    const status = document.getElementById(button.dataset.status);
+    try{
+      await navigator.clipboard.writeText(sql);
+      status.textContent = "Copied.";
+    }catch(error){
+      const fallback = document.createElement("textarea");
+      fallback.value = sql;
+      fallback.setAttribute("readonly","");
+      fallback.style.position = "fixed";
+      fallback.style.opacity = "0";
+      document.body.appendChild(fallback);
+      fallback.select();
+      const copied = document.execCommand("copy");
+      fallback.remove();
+      status.textContent = copied ? "Copied." : "Copy unavailable. Select the SQL text manually.";
+    }
+    window.setTimeout(function(){status.textContent = "";},2500);
+  });
+});
+</script>
+</body>
+</html>
